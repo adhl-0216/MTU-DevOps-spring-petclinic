@@ -48,6 +48,7 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=adhl-0216_MTU-DevOps-spring-petclinic
+            -Dsonar.organization=gh-adhl-0216 
             -Dsonar.qualitygate.wait=true
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
