@@ -17,7 +17,7 @@ jobs:
   build-and-push:
     needs: sonarcloud
     runs-on: ubuntu-latest
-    environment: docker-push  # Requires review before proceeding
+    environment: docker-push
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -80,7 +80,7 @@ jobs:
   deploy-production:
     needs: deploy-staging
     runs-on: ubuntu-latest
-    environment: production  # Requires review before proceeding
+    environment: production  
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
