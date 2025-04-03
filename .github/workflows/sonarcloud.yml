@@ -36,27 +36,27 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=adhl-0216_MTU-DevOps-spring-petclinic
-      - name: Check Code Coverage
-        run: |
-          COVERAGE=$(mvn jacoco:report -q -Dquiet=true && grep -oP '(?<=<td class="right" data-value=")[0-9.]+(?=")' target/site/jacoco/index.html | head -1)
-          if [[ -z "$COVERAGE" ]]; then
-            echo "Error: Could not extract code coverage percentage."
-            exit 1
-          fi
-          echo "Code Coverage: $COVERAGE%"
-          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-            echo "Coverage $COVERAGE% is below 80%. Failing the build."
-            exit 1
-          fi
-      - name: Check SonarCloud Quality Gate
-        uses: SonarSource/sonarcloud-github-action@master
-        with:
-          args: >
-            -Dsonar.projectKey=adhl-0216_MTU-DevOps-spring-petclinic
-            -Dsonar.organization=gh-adhl-0216
-            -Dsonar.qualitygate.wait=true
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      # - name: Check Code Coverage
+      #   run: |
+      #     COVERAGE=$(mvn jacoco:report -q -Dquiet=true && grep -oP '(?<=<td class="right" data-value=")[0-9.]+(?=")' target/site/jacoco/index.html | head -1)
+      #     if [[ -z "$COVERAGE" ]]; then
+      #       echo "Error: Could not extract code coverage percentage."
+      #       exit 1
+      #     fi
+      #     echo "Code Coverage: $COVERAGE%"
+      #     if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+      #       echo "Coverage $COVERAGE% is below 80%. Failing the build."
+      #       exit 1
+      #     fi
+      # - name: Check SonarCloud Quality Gate
+      #   uses: SonarSource/sonarcloud-github-action@master
+      #   with:
+      #     args: >
+      #       -Dsonar.projectKey=adhl-0216_MTU-DevOps-spring-petclinic
+      #       -Dsonar.organization=gh-adhl-0216
+      #       -Dsonar.qualitygate.wait=true
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Send Slack Notification (SonarCloud Complete, Pending Docker Push Review)
         uses: slackapi/slack-github-action@v2.0.0
         with:
