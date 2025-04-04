@@ -1,9 +1,9 @@
-name: Build and Deploy Spring Boot Image
+name: Deploy to AWS ECS
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 jobs:
@@ -60,11 +60,11 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: ./terraform
+        working-directory: ./.github/workflows/terraform
 
       - name: Terraform Apply Staging
         run: terraform apply -auto-approve -var "image_tag=${{ github.sha }}" -var "environment=staging" -var "dockerhub_username=${{ secrets.DOCKERHUB_USERNAME }}"
-        working-directory: ./terraform
+        working-directory: ./.github/workflows/terraform
 
       - name: Send Slack Notification (Staging Complete, Pending Production Review)
         uses: slackapi/slack-github-action@v2.0.0
@@ -98,11 +98,11 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: ./terraform
+        working-directory: ./.github/workflows/terraform
 
       - name: Terraform Apply Production
         run: terraform apply -auto-approve -var "image_tag=${{ github.sha }}" -var "environment=production" -var "dockerhub_username=${{ secrets.DOCKERHUB_USERNAME }}"
-        working-directory: ./terraform
+        working-directory: ./.github/workflows/terraform
 
       - name: Send Slack Notification (Production)
         uses: slackapi/slack-github-action@v2.0.0
