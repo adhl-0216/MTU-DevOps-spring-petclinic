@@ -91,8 +91,15 @@ resource "aws_ecs_service" "petclinic_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = ["subnet-12345678"]  # Replace with your Learner Lab subnet IDs
-    security_groups  = ["sg-12345678"]      # Replace with your Learner Lab security group ID
+    subnets          = [
+                          "subnet-0bf83b18a617f4b33",
+                          "subnet-0e0eaedd336f971e3",
+                          "subnet-091765090f534e073","
+                          "subnet-0ce390d316b25b702",
+                          "subnet-013444a856452b902",
+                          "subnet-052e2ceaea77ebb20"
+                        ] 
+    security_groups  = ["sg-053616a87cc68ce16"] 
     assign_public_ip = true
   }
 }
