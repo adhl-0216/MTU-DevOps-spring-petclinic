@@ -91,34 +91,22 @@ resource "aws_ecs_service" "petclinic_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = [
-                          "subnet-0bf83b18a617f4b33",
-                          "subnet-0e0eaedd336f971e3",
-                          "subnet-091765090f534e073","
-                          "subnet-0ce390d316b25b702",
-                          "subnet-013444a856452b902",
-                          "subnet-052e2ceaea77ebb20"
-                        ] 
-    security_groups  = ["sg-053616a87cc68ce16"] 
+    subnets = [
+      "subnet-0bf83b18a617f4b33",
+      "subnet-0e0eaedd336f971e3",
+      "subnet-091765090f534e073",
+      "subnet-0ce390d316b25b702",
+      "subnet-013444a856452b902",
+      "subnet-052e2ceaea77ebb20"
+    ]
+    security_groups  = ["sg-053616a87cc68ce16"]
     assign_public_ip = true
   }
 }
 
 # IAM Role for ECS Task Execution (LabRole assumed)
-resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "LabRole"  # Must match Learner Lab's LabRole name
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "ecs-tasks.amazonaws.com"
-      }
-    }]
-  })
-  # Note: In Learner Lab, this role already exists; Terraform might fail if it tries to recreate it
-  # Use an existing role reference instead if needed (see below)
+data "aws_iam_role" "lab_role" {
+  name = "LabRole"
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
