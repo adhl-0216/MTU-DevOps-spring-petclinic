@@ -19,11 +19,6 @@ data "aws_iam_role" "lab_role" {
   name = "LabRole"
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
-  role       = data.aws_iam_role.lab_role.name  # Use the data source name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
 # ECS Clusters
 resource "aws_ecs_cluster" "staging_cluster" {
   count = var.environment == "staging" ? 1 : 0
@@ -71,8 +66,8 @@ resource "aws_ecs_task_definition" "petclinic_task" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"  # Compatible with small instance type
   memory                   = "512"  # Compatible with small instance type
-  execution_role_arn       = data.aws_iam_role.lab_role.arn  # Use the data source ARN
-  task_role_arn            = data.aws_iam_role.lab_role.arn  # Use the data source ARN
+  execution_role_arn       = data.aws_iam_role.lab_role.arn  # Use existing LabRole
+  task_role_arn            = data.aws_iam_role.lab_role.arn  # Use existing LabRole
 
   container_definitions = jsonencode([{
     name  = "petclinic"
