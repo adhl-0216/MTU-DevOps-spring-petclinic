@@ -1,0 +1,114 @@
+name: Deploy to AWS ECS
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  workflow_dispatch:
+
+jobs:
+  sonarcloud:
+    uses: ./.github/workflows/sonarcloud.yml
+    secrets: inherit
+
+  build-and-push:
+    needs: sonarcloud
+    runs-on: ubuntu-latest
+    environment: docker-push
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build Image with Maven
+        run: ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=${{ secrets.DOCKERHUB_USERNAME }}/petclinic:${{ github.sha }} --no-transfer-progress
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push Image to Docker Hub
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/petclinic:${{ github.sha }}
+
+  deploy-staging:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./.github/workflows/terraform
+
+      - name: Terraform Apply Staging
+        run: terraform apply -auto-approve -var "image_tag=${{ github.sha }}" -var "environment=staging" -var "dockerhub_username=${{ secrets.DOCKERHUB_USERNAME }}"
+        working-directory: ./.github/workflows/terraform
+
+      - name: Send Slack Notification (Staging Complete, Pending Production Review)
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "Staging Deployment Complete: ${{ job.status }} for commit ${{ github.sha }}. Production deployment is pending review in GitHub Actions."
+
+  deploy-production:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./.github/workflows/terraform
+
+      - name: Terraform Apply Production
+        run: terraform apply -auto-approve -var "image_tag=${{ github.sha }}" -var "environment=production" -var "dockerhub_username=${{ secrets.DOCKERHUB_USERNAME }}"
+        working-directory: ./.github/workflows/terraform
+
+      - name: Send Slack Notification (Production)
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "Production Deployment: ${{ job.status }} for commit ${{ github.sha }}"
