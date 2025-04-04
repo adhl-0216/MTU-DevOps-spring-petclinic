@@ -20,7 +20,7 @@ data "aws_iam_role" "lab_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
-  role       = aws_iam_role.ecs_task_execution_role.name
+  role       = data.aws_iam_role.lab_role.name  # Use the data source name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
@@ -71,8 +71,8 @@ resource "aws_ecs_task_definition" "petclinic_task" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"  # Compatible with small instance type
   memory                   = "512"  # Compatible with small instance type
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  task_role_arn            = aws_iam_role.ecs_task_execution_role.arn  # Use LabRole equivalent
+  execution_role_arn       = data.aws_iam_role.lab_role.arn  # Use the data source ARN
+  task_role_arn            = data.aws_iam_role.lab_role.arn  # Use the data source ARN
 
   container_definitions = jsonencode([{
     name  = "petclinic"
@@ -113,5 +113,3 @@ resource "aws_ecs_service" "petclinic_service" {
     assign_public_ip = true
   }
 }
-
-
