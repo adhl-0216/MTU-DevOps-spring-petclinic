@@ -49,3 +49,9 @@ out/
 _site/
 *.css
 !petclinic.css
+
+### Terraform ###
+terraform.tfstate
+terraform.tfstate.backup
+.terraform/
+.env
