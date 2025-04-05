@@ -9,10 +9,7 @@ on:
 jobs:
   sonarcloud:
     uses: ./.github/workflows/sonarcloud.yml
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+    secrets: inherit
 
   build-and-push:
     needs: sonarcloud
