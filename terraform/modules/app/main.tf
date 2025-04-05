@@ -1,8 +1,3 @@
-# IAM Role for ECS Task Execution (LabRole assumed)
-data "aws_iam_role" "lab_role" {
-  name = "LabRole"
-}
-
 # ECS Task Definition
 resource "aws_ecs_task_definition" "petclinic_task" {
   family                   = "petclinic-task-${var.environment}"
@@ -10,8 +5,8 @@ resource "aws_ecs_task_definition" "petclinic_task" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
   memory                   = "512"
-  execution_role_arn       = data.aws_iam_role.lab_role.arn
-  task_role_arn            = data.aws_iam_role.lab_role.arn
+  execution_role_arn       = "arn:aws:iam::215262883158:role/LabRole"
+  task_role_arn            = "arn:aws:iam::215262883158:role/LabRole"
 
   container_definitions = jsonencode([{
     name  = "petclinic"
