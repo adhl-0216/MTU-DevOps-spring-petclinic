@@ -1,0 +1,61 @@
+name: Deploy ECS App
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'The GitHub environment to deploy to'
+        required: true
+        type: string
+      image_tag:
+        description: 'Docker image tag to deploy'
+        required: true
+        type: string
+      dockerhub_username:
+        description: 'DockerHub username for the image'
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_SESSION_TOKEN:
+        required: true
+      SLACK_BOT_TOKEN:
+        required: true
+      SLACK_CHANNEL_ID:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./terraform
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -target=module.app -var "image_tag=${{ inputs.image_tag }}" -var "environment=${{ inputs.environment }}" -var "dockerhub_username=${{ inputs.dockerhub_username }}" -var "cluster_id=${{ env.CLUSTER_ID }}" -var "log_group_name=${{ env.LOG_GROUP_NAME }}"
+        working-directory: ./terraform
+      - name: Send Slack Notification
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "${{ inputs.environment }} Deployment Complete: ${{ job.status }} for commit ${{ github.sha }}."
