@@ -27,14 +27,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Build Image with Maven
-        run: ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=${{ secrets.DOCKERHUB_USERNAME }}/petclinic:${{ github.sha }} --no-transfer-progress
+        run: ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=${{ vars.DOCKERHUB_USERNAME }}/petclinic:${{ github.sha }} --no-transfer-progress
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Push Image to Docker Hub
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/petclinic:${{ github.sha }}
+        run: docker push ${{ vars.DOCKERHUB_USERNAME }}/petclinic:${{ github.sha }}
 
   deploy-staging:
     needs: build-and-push
@@ -42,7 +42,7 @@ jobs:
     with:
       environment: staging
       image_tag: ${{ github.sha }}
-      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_username: ${{ vars.DOCKERHUB_USERNAME }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -56,7 +56,7 @@ jobs:
     with:
       environment: production
       image_tag: ${{ github.sha }}
-      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_username: ${{ vars.DOCKERHUB_USERNAME }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
