@@ -53,7 +53,7 @@ jobs:
         working-directory: ./terraform
       - name: Update ECS Service
         run: |
-          TASK_DEF_ARN=$(terraform output -raw app_task_definition_arn)
+          TASK_DEF_ARN=$(terraform output -raw task_definition_arn)
           aws ecs update-service \
             --cluster petclinic-${{ inputs.environment }}-cluster \
             --service petclinic-${{ inputs.environment }}-service \
