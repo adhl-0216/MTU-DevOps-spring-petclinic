@@ -24,7 +24,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Build Image with Maven
-        run: ./mvnw spring-boot:build-image --no-transfer-progress
+        run: ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=${{ vars.DOCKERHUB_USERNAME }}/petclinic:${{ github.sha }} --no-transfer-progress
       - name: Tag Image as Latest
         run: docker tag ${{ vars.DOCKERHUB_USERNAME }}/petclinic:${{ github.sha }} ${{ vars.DOCKERHUB_USERNAME }}/petclinic:latest
       - name: Log in to Docker Hub
