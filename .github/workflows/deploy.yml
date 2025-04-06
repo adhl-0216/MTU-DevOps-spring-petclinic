@@ -56,7 +56,7 @@ jobs:
           TASK_DEF_ARN=$(terraform output -raw task_definition_arn)
           aws ecs update-service \
             --cluster petclinic-${{ inputs.environment }}-cluster \
-            --service petclinic-${{ inputs.environment }}-service \
+            --service petclinic-service-${{ inputs.environment }}\
             --task-definition $TASK_DEF_ARN \
             --force-new-deployment
         working-directory: ./terraform
