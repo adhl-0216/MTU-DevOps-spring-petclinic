@@ -47,10 +47,10 @@ jobs:
           terraform_version: 1.5.0
       - name: Terraform Init
         run: terraform init
-        working-directory: ./.github/terraform
+        working-directory: ./terraform
       - name: Terraform Apply
         run: terraform apply -auto-approve -target=module.app -var "image_tag=${{ inputs.image_tag }}" -var "environment=${{ inputs.environment }}" -var "dockerhub_username=${{ inputs.dockerhub_username }}"
-        working-directory: ./.github/terraform
+        working-directory: ./terraform
       - name: Update ECS Service
         run: |
           TASK_DEF_ARN=$(terraform output -raw task_definition_arn)
@@ -59,7 +59,7 @@ jobs:
             --service petclinic-service-${{ inputs.environment }}\
             --task-definition $TASK_DEF_ARN \
             --force-new-deployment
-        working-directory: ./.github/terraform
+        working-directory: ./terraform
       - name: Send Slack Notification
         uses: slackapi/slack-github-action@v2.0.0
         with:
