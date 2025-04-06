@@ -32,8 +32,10 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Push Image to Docker Hub
+      - name: Push Image to Docker Hub (SHA Tag)
         run: docker push ${{ vars.DOCKERHUB_USERNAME }}/petclinic:${{ github.sha }}
+      - name: Push Image to Docker Hub (Latest Tag)
+        run: docker push ${{ vars.DOCKERHUB_USERNAME }}/petclinic:latest
 
   deploy-staging:
     needs: build-and-push
@@ -53,7 +55,7 @@ jobs:
     needs: deploy-staging
     uses: ./.github/workflows/deploy.yml
     with:
-      environment: production
+      environment: prod
       image_tag: ${{ github.sha }}
       dockerhub_username: ${{ vars.DOCKERHUB_USERNAME }}
     secrets:
