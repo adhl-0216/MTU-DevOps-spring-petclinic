@@ -152,7 +152,7 @@ resource "aws_lb_target_group" "staging_tg" {
 
   health_check {
     path                = "/"
-    interval            = 60
+    interval            = 90
     timeout             = 10
     healthy_threshold   = 2
     unhealthy_threshold = 2
@@ -169,7 +169,7 @@ resource "aws_lb_target_group" "prod_tg" {
 
   health_check {
     path                = "/"
-    interval            = 60
+    interval            = 90
     timeout             = 10
     healthy_threshold   = 2
     unhealthy_threshold = 2
