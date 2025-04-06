@@ -58,7 +58,7 @@ resource "aws_ecs_service" "petclinic_service" {
 
   network_configuration {
     subnets = var.subnet_ids
-    security_groups  = [data.aws_security_group.alb_sg]
+    security_groups  = [data.aws_security_group.alb_sg.name]
     assign_public_ip = true
   }
 
