@@ -4,7 +4,7 @@ data "aws_security_group" "alb_sg" {
 }
 
 data "aws_ecs_cluster" "petclinic_cluster" {
-  cluster_name = "petclinic-${var.environment}" 
+  cluster_name = "petclinic-${var.environment}-cluster" 
 }
 
 data "aws_lb" "petclinic_alb" {
