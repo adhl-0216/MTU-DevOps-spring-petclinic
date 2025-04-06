@@ -13,6 +13,11 @@ variable "dockerhub_username" {
   default = "adhlo216"
 }
 
+variable "labrole_arn" {
+  type = string
+  default = "arn:aws:iam::215262883158:role/LabRole"
+}
+
 variable "vpc_id" {
   type    = string
   default = "vpc-0dbb8d966ba500adb"

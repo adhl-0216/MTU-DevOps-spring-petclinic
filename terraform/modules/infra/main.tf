@@ -154,3 +154,99 @@ resource "aws_lb_target_group" "prod_tg" {
     unhealthy_threshold = 2
   }
 }
+
+# ECS Task Definition (Initial Provision)
+resource "aws_ecs_task_definition" "petclinic_task_staging" {
+  family                = "petclinic-task-staging"
+  network_mode          = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                   = "256"
+  memory                = "2048"
+  execution_role_arn    = var.labrole_arn
+  task_role_arn         = var.labrole_arn
+
+  container_definitions = jsonencode([{
+    name  = "petclinic"
+    image = "${var.dockerhub_username}/petclinic" 
+    portMappings = [{
+      containerPort = 8080
+      hostPort      = 8080
+    }]
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        "awslogs-group"     = aws_cloudwatch_log_group.staging_logs.name
+        "awslogs-region"    = "us-east-1"
+        "awslogs-stream-prefix" = "ecs"
+      }
+    }
+  }])
+}
+
+resource "aws_ecs_task_definition" "petclinic_task_prod" {
+  family                = "petclinic-task-prod"
+  network_mode          = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                   = "256"
+  memory                = "2048"
+  execution_role_arn    = var.labrole_arn
+  task_role_arn         = var.labrole_arn
+
+  container_definitions = jsonencode([{
+    name  = "petclinic"
+    image = "${var.dockerhub_username}/petclinic" 
+    portMappings = [{
+      containerPort = 8080
+      hostPort      = 8080
+    }]
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        "awslogs-group"     = aws_cloudwatch_log_group.prod_logs.name
+        "awslogs-region"    = "us-east-1"
+        "awslogs-stream-prefix" = "ecs"
+      }
+    }
+  }])
+}
+
+# ECS Services
+resource "aws_ecs_service" "petclinic_service_staging" {
+  name            = "petclinic-service-staging"
+  cluster         = aws_ecs_cluster.staging_cluster.id
+  task_definition = aws_ecs_task_definition.petclinic_task_staging.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = var.subnet_ids
+    security_groups  = [aws_security_group.alb_sg.id]
+    assign_public_ip = true
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.staging_tg.arn
+    container_name   = "petclinic"
+    container_port   = 8080
+  }
+}
+
+resource "aws_ecs_service" "petclinic_service_prod" {
+  name            = "petclinic-service-prod"
+  cluster         = aws_ecs_cluster.prod_cluster.id
+  task_definition = aws_ecs_task_definition.petclinic_task_prod.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = var.subnet_ids
+    security_groups  = [aws_security_group.alb_sg.id]
+    assign_public_ip = true
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.prod_tg.arn
+    container_name   = "petclinic"
+    container_port   = 8080
+  }
+}

@@ -48,23 +48,3 @@ resource "aws_ecs_task_definition" "petclinic_task" {
   }])
 }
 
-# ECS Service
-resource "aws_ecs_service" "petclinic_service" {
-  name            = "petclinic-service-${var.environment}"
-  cluster         = data.aws_ecs_cluster.petclinic_cluster.id
-  task_definition = aws_ecs_task_definition.petclinic_task.arn
-  desired_count   = 1
-  launch_type     = "FARGATE"
-
-  network_configuration {
-    subnets = var.subnet_ids
-    security_groups  = [data.aws_security_group.alb_sg.id]
-    assign_public_ip = true
-  }
-
-  load_balancer {
-    target_group_arn = data.aws_lb_target_group.petclinic_tg.arn
-    container_name   = "petclinic"
-    container_port   = 8080
-  }
-}

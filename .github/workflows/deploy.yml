@@ -51,6 +51,15 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve -target=module.app -var "image_tag=${{ inputs.image_tag }}" -var "environment=${{ inputs.environment }}" -var "dockerhub_username=${{ inputs.dockerhub_username }}"
         working-directory: ./terraform
+      - name: Update ECS Service
+        run: |
+          TASK_DEF_ARN=$(terraform output -raw app_task_definition_arn)
+          aws ecs update-service \
+            --cluster petclinic-${{ inputs.environment }}-cluster \
+            --service petclinic-${{ inputs.environment }}-service \
+            --task-definition $TASK_DEF_ARN \
+            --force-new-deployment
+        working-directory: ./terraform
       - name: Send Slack Notification
         uses: slackapi/slack-github-action@v2.0.0
         with:
