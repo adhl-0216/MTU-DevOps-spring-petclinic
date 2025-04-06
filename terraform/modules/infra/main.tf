@@ -82,6 +82,26 @@ resource "aws_security_group" "alb_sg" {
   }
 }
 
+resource "aws_security_group" "ecs_tasks_sg" {
+  name        = "petclinic-ecs-tasks-sg"
+  description = "Security group for ECS tasks"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_sg.id] 
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 # Prod ALB
 resource "aws_lb" "petclinic_alb_prod" {
   name               = "petclinic-alb-prod"
@@ -125,7 +145,7 @@ resource "aws_lb_listener" "staging_listener" {
 # Target Groups
 resource "aws_lb_target_group" "staging_tg" {
   name     = "petclinic-staging-tg"
-  port     = 80
+  port     = 8080
   protocol = "HTTP"
   vpc_id   = var.vpc_id
   target_type = "ip"
@@ -136,12 +156,13 @@ resource "aws_lb_target_group" "staging_tg" {
     timeout             = 5
     healthy_threshold   = 2
     unhealthy_threshold = 2
+    port                = 8080
   }
 }
 
 resource "aws_lb_target_group" "prod_tg" {
   name     = "petclinic-prod-tg"
-  port     = 80
+  port     = 8080
   protocol = "HTTP"
   vpc_id   = var.vpc_id
   target_type = "ip"
@@ -152,6 +173,7 @@ resource "aws_lb_target_group" "prod_tg" {
     timeout             = 5
     healthy_threshold   = 2
     unhealthy_threshold = 2
+    port                = 8080
   }
 }
 
@@ -220,7 +242,7 @@ resource "aws_ecs_service" "petclinic_service_staging" {
 
   network_configuration {
     subnets          = var.subnet_ids
-    security_groups  = [aws_security_group.alb_sg.id]
+    security_groups  = [aws_security_group.ecs_tasks_sg.id]
     assign_public_ip = true
   }
 
@@ -240,7 +262,7 @@ resource "aws_ecs_service" "petclinic_service_prod" {
 
   network_configuration {
     subnets          = var.subnet_ids
-    security_groups  = [aws_security_group.alb_sg.id]
+    security_groups  = [aws_security_group.ecs_tasks_sg.id]
     assign_public_ip = true
   }
 
