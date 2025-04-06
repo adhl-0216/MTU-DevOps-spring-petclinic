@@ -155,7 +155,7 @@ resource "aws_lb_target_group" "staging_tg" {
     interval            = 90
     timeout             = 10
     healthy_threshold   = 2
-    unhealthy_threshold = 2
+    unhealthy_threshold = 5
     port                = 8080
   }
 }
@@ -172,7 +172,7 @@ resource "aws_lb_target_group" "prod_tg" {
     interval            = 90
     timeout             = 10
     healthy_threshold   = 2
-    unhealthy_threshold = 2
+    unhealthy_threshold = 5
     port                = 8080
   }
 }
