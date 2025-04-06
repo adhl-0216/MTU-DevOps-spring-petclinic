@@ -14,7 +14,7 @@ resource "aws_cloudwatch_log_group" "staging_logs" {
 }
 
 resource "aws_cloudwatch_log_group" "prod_logs" {
-  name              = "/ecs/petclinic-production"
+  name              = "/ecs/petclinic-prod"
   retention_in_days = 30
 }
 
