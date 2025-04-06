@@ -152,8 +152,8 @@ resource "aws_lb_target_group" "staging_tg" {
 
   health_check {
     path                = "/"
-    interval            = 30
-    timeout             = 5
+    interval            = 60
+    timeout             = 10
     healthy_threshold   = 2
     unhealthy_threshold = 2
     port                = 8080
@@ -169,8 +169,8 @@ resource "aws_lb_target_group" "prod_tg" {
 
   health_check {
     path                = "/"
-    interval            = 30
-    timeout             = 5
+    interval            = 60
+    timeout             = 10
     healthy_threshold   = 2
     unhealthy_threshold = 2
     port                = 8080
