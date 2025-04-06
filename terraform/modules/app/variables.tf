@@ -10,10 +10,12 @@ variable "dockerhub_username" {
   type = string
 }
 
-variable "cluster_id" {
+variable "labrole_arn" {
   type = string
+  default = "arn:aws:iam::215262883158:role/LabRole"
 }
 
-variable "log_group_name" {
-  type = string
+variable "subnet_ids" {
+  description = "List of subnet IDs for ECS service"
+  type        = list(string)
 }
