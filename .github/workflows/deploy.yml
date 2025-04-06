@@ -49,7 +49,7 @@ jobs:
         run: terraform init
         working-directory: ./terraform
       - name: Terraform Apply
-        run: terraform apply -auto-approve -target=module.app -var "image_tag=${{ inputs.image_tag }}" -var "environment=${{ inputs.environment }}" -var "dockerhub_username=${{ inputs.dockerhub_username }}" -var "cluster_id=${{ env.CLUSTER_ID }}"
+        run: terraform apply -auto-approve -target=module.app -var "image_tag=${{ inputs.image_tag }}" -var "environment=${{ inputs.environment }}" -var "dockerhub_username=${{ inputs.dockerhub_username }}"
         working-directory: ./terraform
       - name: Send Slack Notification
         uses: slackapi/slack-github-action@v2.0.0
